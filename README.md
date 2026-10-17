@@ -1,10 +1,10 @@
 
 
-\# Ultrasonic Doppler Gesture Sensing
+# Ultrasonic Doppler Gesture Sensing
 
 
 
-\### Real-Time, Contactless Hand Gesture Recognition Using Laptop Audio Hardware
+### Real-Time, Contactless Hand Gesture Recognition Using Laptop Audio Hardware
 
 
 
@@ -16,7 +16,7 @@ The system continuously transmits a 19 kHz tone, records reflected audio, and an
 
 
 
-\## Project Overview
+## Project Overview
 
 
 
@@ -32,40 +32,31 @@ The project also investigates left/right gesture recognition using multichannel 
 
 
 
-\## Demonstration
+## Demonstration
 
 
 
-!\[Arm Swing Doppler Detection](assets/Spectogram%20of%20arm%20swing%20detection.png)
+![Arm Swing Doppler Detection](assets/Spectogram%20of%20arm%20swing%20detection.png)
 
 
 
-\*Recorded spectrogram showing frequency changes around the 19 kHz carrier during hand movement.\*
+*Recorded spectrogram showing frequency changes around the 19 kHz carrier during hand movement.*
 
 
 
-\## Current Capabilities
+## Current Capabilities
 
 
 
 | Feature | Status |
-
 |---|---|
-
 | 19 kHz tone generation | Implemented |
-
 | Simultaneous audio playback and recording | Implemented |
-
 | Live spectrogram visualization | Implemented |
-
 | Toward/away gesture classification | Working prototype |
-
 | No-motion detection | Working prototype |
-
 | Multichannel microphone analysis | Experimental |
-
 | Left/right swipe classification | Under investigation |
-
 | Formal classification accuracy testing | Pending |
 
 
@@ -74,7 +65,7 @@ Toward/away recognition has been demonstrated experimentally. Reliable left/righ
 
 
 
-\## How It Works
+## How It Works
 
 
 
@@ -86,25 +77,22 @@ For an approximately radial reflection path:
 
 
 
-\\\[
-
-\\Delta f \\approx \\frac{2vf\_0}{c}
-
-\\]
-
+$$
+\Delta f \approx \frac{2vf_0}{c}
+$$
 
 
 Where:
 
 
 
-\- `Δf` — Doppler frequency shift (Hz)
+- `Δf` — Doppler frequency shift (Hz)
 
-\- `v` — radial hand velocity (m/s)
+- `v` — radial hand velocity (m/s)
 
-\- `f₀` — transmitted frequency (19,000 Hz)
+- `f₀` — transmitted frequency (19,000 Hz)
 
-\- `c` — speed of sound (approximately 343 m/s)
+- `c` — speed of sound (approximately 343 m/s)
 
 
 
@@ -116,41 +104,41 @@ The software uses short-time spectral analysis to visualize and identify these c
 
 
 
-\## Technologies
+## Technologies
 
 
 
-\- Python 3.13
+- Python 3.13
 
-\- NumPy
+- NumPy
 
-\- SciPy
+- SciPy
 
-\- Matplotlib
+- Matplotlib
 
-\- SoundDevice
+- SoundDevice
 
-\- Windows audio interfaces (Realtek / WASAPI)
-
-
-
-\### Development Hardware
+- Windows audio interfaces (Realtek / WASAPI)
 
 
 
-\- HP EliteBook 845 G8
-
-\- Built-in laptop speakers
-
-\- Built-in microphone array
-
-\- 48 kHz audio sampling rate
-
-\- 19 kHz transmitted carrier
+### Development Hardware
 
 
 
-\## Installation
+- HP EliteBook 845 G8
+
+- Built-in laptop speakers
+
+- Built-in microphone array
+
+- 48 kHz audio sampling rate
+
+- 19 kHz transmitted carrier
+
+
+
+## Installation
 
 
 
@@ -196,7 +184,7 @@ The commands above assume Windows and Python 3.13.
 
 
 
-\## Running the Project
+## Running the Project
 
 
 
@@ -224,7 +212,7 @@ Or start the live direction detector:
 
 
 
-\*\*Audio configuration:\*\* The scripts currently use device indices configured for the development laptop (input 9, output 8). These may need adjustment on another computer.
+**Audio configuration:** The scripts currently use device indices configured for the development laptop (input 9, output 8). These may need adjustment on another computer.
 
 
 
@@ -232,11 +220,11 @@ Before testing, disable microphone noise suppression and audio enhancements wher
 
 
 
-\## Experimental Results
+## Experimental Results
 
 
 
-\### Frequency Response
+### Frequency Response
 
 
 
@@ -248,7 +236,7 @@ After disabling Windows microphone audio enhancements, the system successfully c
 
 
 
-\### Live Doppler Detection
+### Live Doppler Detection
 
 
 
@@ -260,19 +248,19 @@ Controlled hand movements produced patterns consistent with:
 
 
 
-\- Motion toward the laptop: positive Doppler shift
+- Motion toward the laptop: positive Doppler shift
 
-\- Motion away from the laptop: negative Doppler shift
+- Motion away from the laptop: negative Doppler shift
 
-\- Stationary conditions: stable carrier with limited sideband activity
-
-
-
-!\[Recorded Doppler Spectrogram](results/doppler\_spectrogram.png)
+- Stationary conditions: stable carrier with limited sideband activity
 
 
 
-\### Multichannel Investigation
+![Recorded Doppler Spectrogram](results/doppler\_spectrogram.png)
+
+
+
+### Multichannel Investigation
 
 
 
@@ -284,11 +272,11 @@ Initial left/right recognition experiments using channel-power ratios showed ove
 
 
 
-!\[Four-Channel Comparison](results/four\_channel\_comparison.png)
+![Four-Channel Comparison](results/four\_channel\_comparison.png)
 
 
 
-!\[Temporal Channel Analysis](results/lr\_temporal\_analysis.png)
+![Temporal Channel Analysis](results/lr\_temporal\_analysis.png)
 
 
 
@@ -296,7 +284,7 @@ Broadband finger-snap experiments also revealed channel-dependent arrival-time d
 
 
 
-\## Repository Structure
+## Repository Structure
 
 
 
@@ -328,27 +316,27 @@ Audio recordings in `captures/` are excluded from Git tracking to avoid publishi
 
 
 
-\## Limitations
+## Limitations
 
 
 
-\- Detection performance depends on the laptop's audio hardware.
+- Detection performance depends on the laptop's audio hardware.
 
-\- Windows audio enhancements can strongly affect high-frequency measurements.
+- Windows audio enhancements can strongly affect high-frequency measurements.
 
-\- Background noise and acoustic reflections may produce false detections.
+- Background noise and acoustic reflections may produce false detections.
 
-\- Detector thresholds are currently calibrated experimentally.
+- Detector thresholds are currently calibrated experimentally.
 
-\- Left/right gestures cannot yet be classified reliably.
+- Left/right gestures cannot yet be classified reliably.
 
-\- Formal accuracy, latency, and cross-device evaluations are pending.
+- Formal accuracy, latency, and cross-device evaluations are pending.
 
-\- The existing implementation uses device-specific audio settings.
+- The existing implementation uses device-specific audio settings.
 
 
 
-\## Future Development
+## Future Development
 
 
 
@@ -366,23 +354,25 @@ Audio recordings in `captures/` are excluded from Git tracking to avoid publishi
 
 
 
-\## Documentation
+## Documentation
 
+
+[Download Full Project Progress Report (PDF)](docs/Ultrasonic_Doppler_Gesture_Sensing_Progress_Report_v05.pdf)
 
 
 Detailed development history, experimental measurements, figures, and limitations are available in the `docs/` directory.
 
 
 
-\## Project Team
+## Project Team
 
 
 
-\*\*Saif Eldin Hany\*\*  
+**Saif Eldin Hany**  
 
-\*\*Amr Mohamed\*\*  
+**Amr Mohamed**  
 
-\*\*Mohamed Alaa\*\*
+**Mohamed Alaa**
 
 
 
@@ -390,11 +380,11 @@ Electronics and Communication Engineering Project
 
 
 
-\## Project Status
+## Project Status
 
 
 
-\*\*Active development — experimental prototype\*\*
+**Active development — experimental prototype**
 
 
 
