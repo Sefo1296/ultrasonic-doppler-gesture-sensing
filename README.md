@@ -16,6 +16,12 @@ The system continuously transmits a 19 kHz tone, records reflected audio, and an
 
 
 
+## October 30, 2026 — Development update
+
+Since the original README, the project has progressed to **dual-carrier live ultrasonic sensing** (18.5 kHz left speaker, 19 kHz right speaker). Experimental scripts now support five-zone horizontal tracking including positions beyond the speakers, and a unified program can output LEFT, RIGHT, TOWARD and AWAY when the user manually selects **H (horizontal)** or **V (depth)** mode. Automatic gesture-family recognition, independently labeled accuracy evaluation and robust missed-swipe recovery are still pending.
+
+For the October 29–30 test results, see [Development Progress Update (30 October 2026)](docs/PROGRESS_UPDATE_2026-10-30.md). An updated **v0.6 technical progress report** is prepared for upload; the [v0.5 report](docs/Ultrasonic_Doppler_Gesture_Sensing_Progress_Report_v05.pdf) remains available until that upload is complete.
+
 ## Project Overview
 
 
