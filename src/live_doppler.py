@@ -44,6 +44,7 @@ def audio_callback(indata, outdata, frames, time, status):
         2 * np.pi * FREQ * samples / FS
     )
 
+    # Transmit through BOTH speakers
     outdata[:] = tone[:, None]
     sample_position += frames
 
