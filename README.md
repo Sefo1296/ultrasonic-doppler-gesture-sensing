@@ -145,7 +145,7 @@ README.md
 - [Weekly RF/SVM report — 14 November 2026](docs/Ultrasonic%20Weekly%20Report%20RF%20SVM%2014%202026.pdf)
 - [October development summary](docs/PROGRESS_UPDATE_2026-10-30.md)
 - [Technical progress report v0.5 (PDF)](docs/Ultrasonic_Doppler_Gesture_Sensing_Progress_Report_v05.pdf)
-- The **main v0.7 report** extends the October history with the two November capture sessions and AI comparison; it will be linked here after its Word/PDF files are committed to `docs/`.
+- **Main technical progress report v0.7 (43 pages):** [PDF](docs/Ultrasonic%20Main%20Report%20Version%200.7%20November%202026.pdf) · [Editable Word](docs/Ultrasonic%20Doppler%20Main%20Progress%20Report%20-%20Version%200.7%20-%2014%20November%202026.docx). Covers the October development history, November labeled-data collection, and Random Forest/SVM comparison.
 
 ## Remaining work
 
