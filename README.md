@@ -1,400 +1,166 @@
-
-
 # Ultrasonic Doppler Gesture Sensing
 
+**Contactless hand-gesture recognition using a laptop’s built-in speakers and microphones — no camera or external gesture sensor.**
 
+This ongoing research prototype transmits high-frequency sound through the laptop speakers and analyzes reflections from a moving hand. Development has progressed from live Doppler visualization and manual-mode gesture detectors to a labeled audio dataset and **offline five-class machine-learning classification**.
 
-### Real-Time, Contactless Hand Gesture Recognition Using Laptop Audio Hardware
+## Latest update — 14 November 2026
 
+- Collected **50 labeled gesture recordings** in two complete sessions (25 per session; 10 per class).
+- Implemented two dataset-capture scripts, including an improved version that records the hand used on each trial and allows retakes.
+- Developed a Google Colab workflow extracting **68 STFT-based Doppler features** from two microphone channels and two ultrasonic carriers.
+- Evaluated **Random Forest** and **RBF Support Vector Machine (SVM)** on identical leave-one-session-out folds.
+- Recorded preliminary accuracy of **98% for Random Forest (49/50)** and **94% for SVM (47/50)** on the two-session dataset.
+- The trained classifiers currently operate **offline on prerecorded WAV files**. Automatic, continuous live five-class AI recognition is not yet implemented.
 
+**Latest published weekly report:** [Random Forest and SVM Progress Report (PDF)](docs/Ultrasonic%20Weekly%20Report%20RF%20SVM%2014%202026.pdf) · [Word](docs/Ultrasonic%20Weekly%20Report%20RF%20SVM%2014%202026.docx)
 
-A Python-based gesture sensing system that uses a laptop's built-in speaker and microphone to detect hand motion through the acoustic Doppler effect.
+**AI work:** [SVM vs Random Forest Colab notebook](Ultrasonic_SVM_vs_Random_Forest_Colab.ipynb) · [Technical AI handover](Ultrasonic_Doppler_AI_Full_Handover.md)
 
+> **Research limitation:** The 98% and 94% scores are preliminary, session-held-out results from one participant recorded in two closely spaced sessions. They are not demonstrated real-world, cross-user or cross-device accuracy.
 
+## Hardware and ultrasonic setup
 
-The system continuously transmits a 19 kHz tone, records reflected audio, and analyzes frequency shifts to identify motion. No external sensors, cameras, or microcontrollers are required.
-
-
-
-## October 30, 2026 — Development update
-
-Since the original README, the project has progressed to **dual-carrier live ultrasonic sensing** (18.5 kHz left speaker, 19 kHz right speaker). Experimental scripts now support five-zone horizontal tracking including positions beyond the speakers, and a unified program can output LEFT, RIGHT, TOWARD and AWAY when the user manually selects **H (horizontal)** or **V (depth)** mode. Automatic gesture-family recognition, independently labeled accuracy evaluation and robust missed-swipe recovery are still pending.
-
-For the October 29–30 test results, see [Development Progress Update (30 October 2026)](docs/PROGRESS_UPDATE_2026-10-30.md). An updated **v0.6 technical progress report** is prepared for upload; the [v0.5 report](docs/Ultrasonic_Doppler_Gesture_Sensing_Progress_Report_v05.pdf) remains available until that upload is complete.
-
-## Project Overview
-
-
-
-The objective is to develop a low-cost, contactless gesture recognition system using existing laptop hardware.
-
-
-
-By analyzing Doppler shifts in reflected high-frequency sound, the system can identify movement toward and away from the laptop.
-
-
-
-The project also investigates left/right gesture recognition using multichannel microphone measurements and spatial audio analysis.
-
-
-
-## Demonstration
-
-
-
-![Arm Swing Doppler Detection](assets/Spectogram%20of%20arm%20swing%20detection.png)
-
-
-
-*Recorded spectrogram showing frequency changes around the 19 kHz carrier during hand movement.*
-
-
-
-## Current Capabilities
-
-
-
-| Feature | Status |
+| Component | Setup |
 |---|---|
-| 19 kHz tone generation | Implemented |
-| Simultaneous audio playback and recording | Implemented |
-| Live spectrogram visualization | Implemented |
-| Toward/away gesture classification | Working prototype |
-| No-motion detection | Working prototype |
-| Multichannel microphone analysis | Experimental |
-| Left/right swipe classification | Under investigation |
-| Formal classification accuracy testing | Pending |
+| Development laptop | HP EliteBook 845 G8 |
+| Left speaker | 18,500 Hz continuous tone |
+| Right speaker | 19,000 Hz continuous tone |
+| Microphone recording | Four channels, 48,000 samples/second |
+| Dataset recordings | 3.5 seconds per recording; 16-bit PCM WAV |
+| Software | Python, NumPy, SciPy, sounddevice, Matplotlib, scikit-learn; Google Colab for AI experiments |
 
+Earlier experiments used a single 19 kHz carrier. Dual-carrier experiments transmit both frequencies simultaneously and analyze their Doppler sidebands.
 
+## Gesture classes and capabilities
 
-Toward/away recognition has been demonstrated experimentally. Reliable left/right recognition has not yet been established.
+| Capability | Current status |
+|---|---|
+| Ultrasonic transmission and simultaneous microphone recording | Implemented |
+| Live Doppler spectrogram | Implemented |
+| Toward/away rule-based detection | Demonstrated |
+| Horizontal left/right and multi-zone tracking | Experimental prototypes |
+| Four-direction rule-based detection | Demonstrated with **manual H/V mode selection** |
+| Labeled dataset capture | Two completed 25-trial sessions |
+| Offline five-class machine learning | Random Forest and RBF-SVM evaluated |
+| Fully automatic real-time AI gesture recognition | **Not yet implemented** |
+| Independent multi-person / different-day validation | **Not yet completed** |
 
+The five labeled classes are **LEFT, RIGHT, TOWARD, AWAY, IDLE** (stationary). Gesture labels refer to **movement direction**, not which hand performed the motion.
 
+## Dataset collection — 6 November 2026
 
-## How It Works
+Two sessions produced **50 WAV recordings**, with five examples of each class per session:
 
+| Session | Recording count | Notes |
+|---|---:|---|
+| `20261106_015202_P01` | 25 | Initial capture; hand used per trial not reliably logged, therefore marked `UNKNOWN` |
+| `20261106_021610_P01` | 25 | Improved capture; hand recorded per trial and bad attempts can be discarded and repeated |
 
+The participant used a vertical hand orientation, perpendicular to the keyboard, with palm facing right. Starting positions varied. Mic channels 1 and 2 had stronger received ultrasonic signals than channels 3 and 4; the current AI features use the first two channels.
 
-The speaker emits a continuous high-frequency acoustic signal. When this signal reflects from a moving hand, its frequency changes according to the Doppler effect.
+Capture programs:
+- `experiments/collect_gesture_dataset.py`
+- `experiments/collect_gesture_dataset_v2.py`
 
+**Privacy and reproducibility:** Original WAV captures and the dataset ZIP remain local and are not committed to the public repository. To reproduce training, obtain the appropriately shared labeled dataset separately. Do not treat derived figures or summary metrics as substitutes for the raw recordings.
 
+## AI signal processing and evaluation
 
-For an approximately radial reflection path:
+For each complete recording, the Colab pipeline computes an STFT on each of the first two microphone channels (Hann window; 8192 samples; hop 2048 samples). It measures sideband energy **12–150 Hz above/below** each 18.5 kHz and 19.0 kHz carrier and summarizes spectral balance and activity over time. This yields **68 numerical features per recording**.
 
+Both models use the same feature matrix, labels and **leave-one-session-out** testing: train on Session 1 and test on Session 2, then reverse. This produces 50 held-out predictions, one per recording.
 
+| Metric | Random Forest | RBF-SVM |
+|---|---:|---:|
+| Accuracy | **98.00%** | **94.00%** |
+| Macro precision | 98.18% | 94.85% |
+| Macro recall | 98.00% | 94.00% |
+| Macro F1 | 97.99% | 94.07% |
+| Correct held-out predictions | 49/50 | 47/50 |
 
-$$
-\Delta f \approx \frac{2vf_0}{c}
-$$
+The Random Forest uses 300 trees, maximum depth 5 and minimum leaf size 2. The SVM uses an RBF kernel (`C=1.0`, `gamma="scale"`) with `StandardScaler` fitted within each training fold. Scores summarize this **small two-session pilot**, not deployment performance.
 
+The Colab notebook also contains code to generate detailed per-class evaluation outputs; this README does not claim unshared confusion-matrix entries or identify specific misclassified gestures.
 
-Where:
+## Getting started
 
+Clone and set up a Python environment on Windows:
 
-
-- `Δf` — Doppler frequency shift (Hz)
-
-- `v` — radial hand velocity (m/s)
-
-- `f₀` — transmitted frequency (19,000 Hz)
-
-- `c` — speed of sound (approximately 343 m/s)
-
-
-
-Movement toward the laptop generally produces positive frequency shifts, while movement away produces negative shifts.
-
-
-
-The software uses short-time spectral analysis to visualize and identify these changes.
-
-
-
-## Technologies
-
-
-
-- Python 3.13
-
-- NumPy
-
-- SciPy
-
-- Matplotlib
-
-- SoundDevice
-
-- Windows audio interfaces (Realtek / WASAPI)
-
-
-
-### Development Hardware
-
-
-
-- HP EliteBook 845 G8
-
-- Built-in laptop speakers
-
-- Built-in microphone array
-
-- 48 kHz audio sampling rate
-
-- 19 kHz transmitted carrier
-
-
-
-## Installation
-
-
-
-Clone the repository:
-
-
-
-```bash
-
+```powershell
 git clone https://github.com/Sefo1296/ultrasonic-doppler-gesture-sensing.git
-
 cd ultrasonic-doppler-gesture-sensing
-
-```
-
-
-
-Create a virtual environment:
-
-
-
-```bash
-
 py -3.13 -m venv .venv
-
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
+Launch the original live Doppler visualizer:
 
-
-Install dependencies:
-
-
-
-```bash
-
-.venv\\Scripts\\python.exe -m pip install -r requirements.txt
-
+```powershell
+python src/live_doppler.py
 ```
 
+Launch a new dataset collection session using the improved recording script:
 
-
-The commands above assume Windows and Python 3.13.
-
-
-
-## Running the Project
-
-
-
-From the repository root, start the live Doppler spectrogram:
-
-
-
-```bash
-
-.venv\\Scripts\\python.exe src/live\_doppler.py
-
+```powershell
+python experiments/collect_gesture_dataset_v2.py
 ```
 
+For the offline comparison, upload [the Colab notebook](Ultrasonic_SVM_vs_Random_Forest_Colab.ipynb) to [Google Colab](https://colab.research.google.com/), then follow its cells and provide the labeled dataset ZIP when prompted. The notebook handles ZIP members with Windows-style backslash paths.
 
+**Audio note:** Existing scripts can contain development-laptop device indices (for example, input 9/output 8), so adjust audio devices for other machines. Disabling Windows microphone enhancements was important for reception near 19 kHz. Use reasonable output volume.
 
-Or start the live direction detector:
+## How Doppler sensing works
 
+Reflections from a moving hand create components above and below the transmitted carriers. Their strength and evolution across time, carriers and microphone channels provide features for detecting motion and classifying gestures.
 
-
-```bash
-
-.venv\\Scripts\\python.exe src/live\_direction\_detector.py
-
-```
-
-
-
-**Audio configuration:** The scripts currently use device indices configured for the development laptop (input 9, output 8). These may need adjustment on another computer.
-
-
-
-Before testing, disable microphone noise suppression and audio enhancements where necessary. Use a low speaker volume and avoid prolonged high-level ultrasonic output.
-
-
-
-## Experimental Results
-
-
-
-### Frequency Response
-
-
-
-Initial tests showed severe attenuation of high-frequency signals.
-
-
-
-After disabling Windows microphone audio enhancements, the system successfully captured the transmitted 19 kHz tone.
-
-
-
-### Live Doppler Detection
-
-
-
-Live spectrograms revealed motion-related frequency components around the transmitted carrier.
-
-
-
-Controlled hand movements produced patterns consistent with:
-
-
-
-- Motion toward the laptop: positive Doppler shift
-
-- Motion away from the laptop: negative Doppler shift
-
-- Stationary conditions: stable carrier with limited sideband activity
-
-
-
-![Recorded Doppler Spectrogram](results/doppler\_spectrogram.png)
-
-
-
-### Multichannel Investigation
-
-
-
-Four input channels were evaluated. Channels 0 and 1 provided useful Doppler measurements.
-
-
-
-Initial left/right recognition experiments using channel-power ratios showed overlapping results, making that approach unreliable.
-
-
-
-![Four-Channel Comparison](results/four\_channel\_comparison.png)
-
-
-
-![Temporal Channel Analysis](results/lr\_temporal\_analysis.png)
-
-
-
-Broadband finger-snap experiments also revealed channel-dependent arrival-time differences, suggesting potential spatial sensing capability.
-
-
-
-## Repository Structure
-
-
+For an approximately radial reflection, the idealized frequency shift is:
 
 ```text
-
-src/           Main live detection applications
-
-experiments/   Hardware testing and signal analysis
-
-results/       Generated spectrograms and graphs
-
-assets/        Project demonstration images
-
-docs/          Technical reports and documentation
-
-captures/      Local experimental audio recordings
-
-requirements.txt
-
-README.md
-
-.gitignore
-
+Δf ≈ (2 × v × f₀) / c
 ```
 
+Here, `v` is radial hand speed, `f₀` is the transmitted tone and `c` is the speed of sound. For horizontal movements, multipath propagation and speaker geometry make a simple sign-only rule insufficient; the AI pipeline uses richer temporal and spectral information.
 
+![Recorded hand-motion Doppler spectrogram](assets/Spectogram%20of%20arm%20swing%20detection.png)
 
-Audio recordings in `captures/` are excluded from Git tracking to avoid publishing raw microphone recordings without review.
+## Repository layout
 
+```text
+src/           Original live Doppler and direction detectors
+experiments/   Dual-carrier detection and labeled-data capture scripts
+results/       Previously published analysis figures and results
+assets/        Demonstration images
+docs/          Main technical and weekly progress reports
+captures/      Local raw audio recordings (Git-ignored)
+Ultrasonic_SVM_vs_Random_Forest_Colab.ipynb
+Ultrasonic_Doppler_AI_Full_Handover.md
+requirements.txt
+README.md
+```
 
+## Documentation and development history
 
-## Limitations
+- [Weekly RF/SVM report — 14 November 2026](docs/Ultrasonic%20Weekly%20Report%20RF%20SVM%2014%202026.pdf)
+- [October development summary](docs/PROGRESS_UPDATE_2026-10-30.md)
+- [Technical progress report v0.5 (PDF)](docs/Ultrasonic_Doppler_Gesture_Sensing_Progress_Report_v05.pdf)
+- The **main v0.7 report** extends the October history with the two November capture sessions and AI comparison; it will be linked here after its Word/PDF files are committed to `docs/`.
 
+## Remaining work
 
+1. Collect additional independent recording sessions with varied users, locations, speeds and days.
+2. Inspect misclassifications and verify the models on fresh data before making reliability claims.
+3. Test other microphone-channel combinations and improved motion segmentation.
+4. Integrate the trained classifier into continuous local audio streaming, with event detection and latency testing.
+5. Improve audio-device portability and reproducible reporting.
 
-- Detection performance depends on the laptop's audio hardware.
-
-- Windows audio enhancements can strongly affect high-frequency measurements.
-
-- Background noise and acoustic reflections may produce false detections.
-
-- Detector thresholds are currently calibrated experimentally.
-
-- Left/right gestures cannot yet be classified reliably.
-
-- Formal accuracy, latency, and cross-device evaluations are pending.
-
-- The existing implementation uses device-specific audio settings.
-
-
-
-## Future Development
-
-
-
-1\. Improve motion detection stability and threshold calibration.
-
-2\. Investigate spatial phase differences between microphone channels.
-
-3\. Develop and validate left/right gesture recognition.
-
-4\. Evaluate recognition accuracy with labeled experiments.
-
-5\. Improve portability and automatic audio-device selection.
-
-6\. Integrate recognition into a simplified real-time interface.
-
-
-
-## Documentation
-
-
-[Download Full Project Progress Report (PDF)](docs/Ultrasonic_Doppler_Gesture_Sensing_Progress_Report_v05.pdf)
-
-
-Detailed development history, experimental measurements, figures, and limitations are available in the `docs/` directory.
-
-
-
-## Project Team
-
-
+## Project team
 
 **Saif Eldin Hany**  
-
 **Amr Mohamed**  
-
 **Mohamed Alaa**
-
-
 
 Electronics and Communication Engineering Project
 
-
-
-## Project Status
-
-
-
-**Active development — experimental prototype**
-
-
-
-The current system demonstrates real-time ultrasonic motion sensing and toward/away gesture recognition. Additional validation and gesture classification improvements remain ongoing.
-
-
-
+**Status:** Active experimental research prototype; offline AI comparison completed, continuous real-time five-class AI recognition pending.
